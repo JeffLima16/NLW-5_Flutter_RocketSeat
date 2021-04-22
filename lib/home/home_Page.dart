@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:nlw_next_level5/core/app_colors.dart';
 import 'package:nlw_next_level5/home/Widgets/level_button/level_button_widget.dart';
 import 'package:nlw_next_level5/home/home_state.dart';
-import 'Widgets/quiz/quiz_widget.dart';
 import 'home_controller.dart';
-
 import 'Widgets/appBar/app_bar_widget.dart';
 import 'Widgets/quizcard/quiz_card_widget.dart';
 
