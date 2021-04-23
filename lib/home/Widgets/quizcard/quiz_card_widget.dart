@@ -6,19 +6,22 @@ class QuizCard extends StatelessWidget {
   final String title;
   final String completed;
   final double percent;
+  final VoidCallback onTap;
 
-  const QuizCard(
-      {Key? key,
-      required this.title,
-      required this.completed,
-      required this.percent})
-      : super(key: key);
+  const QuizCard({
+    Key? key,
+    required this.title,
+    required this.completed,
+    required this.percent,
+    required this.onTap,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8),
+    return GestureDetector(
+      onTap: onTap,
       child: Container(
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           border: Border.fromBorderSide(
             BorderSide(color: AppColors.border),
