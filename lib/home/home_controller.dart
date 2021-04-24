@@ -5,7 +5,8 @@ import 'package:nlw_next_level5/shared/Widgets/progress_indicator/models/quiz_mo
 import 'package:nlw_next_level5/shared/Widgets/progress_indicator/models/user_model.dart';
 
 class HomeController {
-  final stateNotifier = ValueNotifier<HomeState>(HomeState.empty);
+  ValueNotifier<HomeState> stateNotifier =
+      ValueNotifier<HomeState>(HomeState.empty);
   set state(HomeState state) => stateNotifier.value = state;
   HomeState get state => stateNotifier.value;
 
@@ -16,12 +17,14 @@ class HomeController {
 
   void getUser() async {
     state = HomeState.loanding;
+    await Future.delayed(Duration(seconds: 2));
     user = await repository.getUser();
     state = HomeState.sucess;
   }
 
   void getQuizzes() async {
     state = HomeState.loanding;
+    await Future.delayed(Duration(seconds: 2));
     quizzes = await repository.getQuizzes();
     state = HomeState.sucess;
   }

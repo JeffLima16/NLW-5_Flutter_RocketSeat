@@ -1,18 +1,49 @@
 import 'package:flutter/material.dart';
-import 'package:nlw_next_level5/home/Widgets/next_button/next_button_widget.dart';
-import 'package:nlw_next_level5/home/Widgets/quest_indicador/quest_indicado_widget.dart';
-import 'package:nlw_next_level5/home/Widgets/quiz/quiz_widget.dart';
+import 'package:nlw_next_level5/challenge/Widgets/quest_indicador/quest_indicado_widget.dart';
+import 'package:nlw_next_level5/result/result_page.dart';
 import 'package:nlw_next_level5/shared/Widgets/progress_indicator/models/question_model.dart';
+import 'Widgets/next_button/next_button_widget.dart';
+import 'Widgets/quiz/quiz_widget.dart';
+import 'challenge_controller.dart';
 
 class ChallengePage extends StatefulWidget {
   final List<QuestionModel> questions;
-  const ChallengePage({Key? key, required this.questions}) : super(key: key);
+  final String title;
+
+  ChallengePage({Key? key, required this.questions, required this.title})
+      : super(key: key);
 
   @override
   _ChallengePageState createState() => _ChallengePageState();
 }
 
 class _ChallengePageState extends State<ChallengePage> {
+  final controller = ChallengeController();
+  final pageController = PageController();
+
+  @override
+  initState() {
+    pageController.addListener(() {
+      controller.currentPage = pageController.page!.toInt() + 1;
+    });
+    super.initState();
+  }
+
+  void nextPage() {
+    if (controller.currentPage < widget.questions.length)
+      pageController.nextPage(
+        duration: Duration(milliseconds: 500),
+        curve: Curves.linear,
+      );
+  }
+
+  void onSelected(bool value) {
+    if (value) {
+      controller.quantityAnswer++;
+    }
+    nextPage();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,44 +51,67 @@ class _ChallengePageState extends State<ChallengePage> {
         preferredSize: Size.fromHeight(86),
         child: SafeArea(
           top: true,
-          child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            IconButton(
-                icon: Icon(Icons.close),
-                onPressed: () {
-                  Navigator.pop(context);
-                }),
-            QuestIndicatorWidget(),
-          ]),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              BackButton(),
+              ValueListenableBuilder<int>(
+                valueListenable: controller.currentPageNotifier,
+                builder: (context, value, _) => QuestionIndicatorWidget(
+                  currentPage: value,
+                  length: widget.questions.length,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
-      body: QuizWidget(
-        questions: widget.questions[0],
+      body: PageView(
+        physics: NeverScrollableScrollPhysics(),
+        controller: pageController,
+        children: widget.questions
+            .map((e) => QuizWidget(
+                  question: e,
+                  onSelected: onSelected,
+                ))
+            .toList(),
       ),
       bottomNavigationBar: SafeArea(
         bottom: true,
         child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 15,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Expanded(
-                  child: NextButton.white(
-                label: "Fácil",
-                onTap: () {},
-              )),
-              SizedBox(
-                width: 7,
-              ),
-              Expanded(
-                child: NextButton.green(
-                  label: "Confirmar",
-                  onTap: () {},
-                ),
-              ),
-            ],
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: ValueListenableBuilder<int>(
+            valueListenable: controller.currentPageNotifier,
+            builder: (context, value, _) => Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                if (value < widget.questions.length)
+                  Expanded(
+                    child: NextButtonWidget.white(
+                      label: 'próxima',
+                      onTap: nextPage,
+                    ),
+                  ),
+                if (value == widget.questions.length)
+                  Expanded(
+                    child: NextButtonWidget.green(
+                      label: 'Confirmar',
+                      onTap: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ResultPage(
+                              title: widget.title,
+                              length: widget.questions.length,
+                              result: controller.quantityAnswer,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
